@@ -28,7 +28,7 @@ const data = {
     },
     {
       id: "node3",
-      shape: 'rect',
+      type: 'rect',
       label: "My Node",
       x: 275,
       y: 350,
@@ -62,18 +62,36 @@ const data = {
 
 const graph = new G6.Graph({
   container: "container",
-  width: 500,
-  height: 500,
-  color: 'r(0.5, 0.5, 1) 0:#7B98FF 1:#37467B',
+  width: 600,
+  height: 700,
+  modes: {
+    default: [
+      {
+        type: 'zoom-canvas'
+      },
+      {
+        type: 'drag-canvas'
+      },
+      {
+        type: 'click-add-node'
+      },
+    ],
+  },
+  animate: true, // Boolean, whether to activate the animation when global changes happen
+  animateCfg: {
+    duration: 500, // Number, the duration of one animation
+    easing: 'linearEasing', // String, the easing function
+  },
   defaultNode: {
     size: [100],
-    color: "#5B8FF9",
-    shape: 'rect',
+    type: 'rect',
     style: {
-      lineWidth: 3
+      lineWidth: 3,
+      fill: "r(0.5, 0.5, 1) 0:#983181 1:#37467B",
     },
     labelCfg: {
       style: {
+        color: "#5B8FF9",
         fill: "#fff",
         fontSize: 20
       }
@@ -89,6 +107,18 @@ const graph = new G6.Graph({
     hover: {
       fillOpacity: 0.5,
       lineWidth: 5,
+      color: "#000000",
+      labelCfg: {
+        style: {
+          fill: "#000000",
+          fontSize: 20
+        }
+      }
+    },
+    detailed: {
+      size: [200],
+      fillOpacity: 0.2,
+      lineWidth: 100,
       color: "#000000",
       labelCfg: {
         style: {
@@ -117,4 +147,56 @@ graph.on('node:mouseleave', (evt) => {
   const node = evt.item;
   // inactivate the hover state of the node
   graph.setItemState(node, 'hover', false);
+  graph.setItemState(node, 'detailed', false);
+});
+
+
+// Listen to the mouse click event on node
+graph.on('node:click', (evt) => {
+  const node = evt.item;
+  // inactivate the hover state of the node
+  graph.setItemState(node, 'hover', false);
+  graph.setItemState(node, 'detailed', true);
+
+  graph.updateItem(node, {
+    label: "Updated",
+    style: {
+      // for keyShape's fill, stroke, and opacity
+     // opacity: 0.5,
+     // y: 0,
+      size: [500],
+      // the styles for the sub shape named 'node-text'
+      'node-text': {
+        stroke: 'yellow',
+      },
+    },
+  });
+  
+});
+
+// Register the custom Behavior of adding a node by clicking
+G6.registerBehavior('click-add-node', {
+  // Bind the events and response functions for this custom Behavior
+  getEvents() {
+    return {
+      'canvas:click': 'onClick', // The event to be listned is canvas:click. The response function is onClick
+    };
+  },
+  // The click event
+  onClick(ev) {
+    const graph = this.graph;
+    const newNodeID = G6.Util.uniqueId(); // Generate a unique id
+    // Add a new node on the canvas
+    //console.log("id:"+newNodeID);
+    const node = graph.addItem('node', {
+      x: ev.x,
+      y: ev.y,
+      id: newNodeID, 
+    });
+
+    const edge = graph.addItem('edge', {
+      source: newNodeID,
+      target: "node3",
+    });
+  },
 });
