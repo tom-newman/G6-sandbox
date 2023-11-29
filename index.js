@@ -64,6 +64,9 @@ const graph = new G6.Graph({
   container: "container",
   width: 600,
   height: 700,
+  layout: {
+    center: [275, 350],
+  },
   modes: {
     default: [
       {
@@ -148,6 +151,7 @@ graph.on('node:mouseleave', (evt) => {
   // inactivate the hover state of the node
   graph.setItemState(node, 'hover', false);
   graph.setItemState(node, 'detailed', false);
+  graph.zoomTo(1);
 });
 
 
@@ -171,7 +175,15 @@ graph.on('node:click', (evt) => {
       },
     },
   });
+  console.log(evt.x+". "+evt.y);
+  /*
+  graph.updateLayout({
+    center: [evt.x, evt.y],
+  });
+   graph.layout();
+  graph.zoomTo(2);
   
+  */
 });
 
 // Register the custom Behavior of adding a node by clicking
